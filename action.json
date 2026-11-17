@@ -13,7 +13,7 @@
   "compat": {
     "platforms": ["windows", "macos"],
     "arch": ["any"],
-    "host": ">=0.5.0 <1.0.0",
+    "host": ">=0.1.0 <2.0.0",
     "features": ["bridge.browser>=1.0", "ps.jsx>=1"],
     "apps": [{ "id": "photoshop", "min": "22.0" }]
   },
