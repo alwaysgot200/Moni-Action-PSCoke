@@ -1,0 +1,15 @@
+{
+  "action.name": "网页图片采集",
+  "setup.label": "设置 PS 脚本",
+  "hint.browser_offline": "请先安装并启用 Moni-Connector 浏览器扩展，确认 Moni 首页的浏览器桥显示已连接。",
+  "hint.ps_setup_required": "请在动作设置中点击「设置 PS 脚本」，把 pscoke.jsx 安装到 Photoshop 的脚本目录后再运行。",
+  "hint.pick_images": "在网页上点选要采集的图片，按 Esc 结束",
+  "error.browser_offline": "浏览器扩展未连接。",
+  "error.ps_unavailable": "无法运行 Photoshop 脚本，请确认已安装并启动 Photoshop。",
+  "error.ps_setup_required": "还没有安装 Photoshop 脚本。",
+  "error.no_elements": "没有选择任何图片",
+  "error.cancelled": "已取消",
+  "error.download_all_failed": "图片全部下载失败",
+  "progress.download": "正在下载 %s/%s",
+  "progress.place": "正在放入 Photoshop（%s 张）"
+}

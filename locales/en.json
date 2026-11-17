@@ -1,0 +1,15 @@
+{
+  "action.name": "Browser Images to PS",
+  "setup.label": "Set up PS script",
+  "hint.browser_offline": "Install and enable the Moni-Connector browser extension, then make sure the browser bridge shows connected in Moni.",
+  "hint.ps_setup_required": "Open the action settings and click \"Set up PS script\" to install pscoke.jsx into Photoshop's Scripts folder.",
+  "hint.pick_images": "Click the images to collect, press Esc to finish",
+  "error.browser_offline": "The browser extension is not connected.",
+  "error.ps_unavailable": "Photoshop scripting is unavailable. Make sure Photoshop is installed and running.",
+  "error.ps_setup_required": "The Photoshop script is not installed yet.",
+  "error.no_elements": "No images were selected",
+  "error.cancelled": "Cancelled",
+  "error.download_all_failed": "All image downloads failed",
+  "progress.download": "Downloading %s/%s",
+  "progress.place": "Placing %s images into Photoshop"
+}
