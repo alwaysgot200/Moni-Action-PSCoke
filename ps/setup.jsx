@@ -7,7 +7,19 @@ function moniOwnFolder() {
   return new File($.fileName).parent;
 }
 
-function moniPresetScriptDirs() {
+function moniPresetScriptDirs(createUser) {
+  var dirs = [];
+  var seen = {};
+  function push(folder) {
+    if (!folder || !folder.exists || seen[folder.fsName]) { return; }
+    dirs.push(folder);
+    seen[folder.fsName] = true;
+  }
+  // 便携版/精简安装的 Photoshop 把脚本目录放在程序目录下，先探测 app.path。
+  try {
+    push(new Folder(app.path + "/Presets/Scripts"));
+  } catch (ignoredAppPath) {}
+
   var root = null;
   var home = $.getenv("HOME");
   var appData = $.getenv("APPDATA");
@@ -16,16 +28,20 @@ function moniPresetScriptDirs() {
   } else if (home) {
     root = new Folder(home + "/Library/Application Support/Adobe");
   }
-  if (!root || !root.exists) { return []; }
+  if (!root || !root.exists) { return dirs; }
 
-  var dirs = [];
   var versions = root.getFiles();
   for (var i = 0; i < versions.length; i++) {
     var entry = versions[i];
     if (!(entry instanceof Folder)) { continue; }
     if (entry.name.indexOf("Adobe Photoshop") !== 0) { continue; }
-    var scripts = new Folder(entry.fsName + "/Presets/Scripts");
-    if (scripts.exists) { dirs.push(scripts); }
+    var presets = new Folder(entry.fsName + "/Presets");
+    var scripts = new Folder(presets.fsName + "/Scripts");
+    // 用户目录可写，PS 启动时同样会扫描；需要时补建 Presets/Scripts。
+    if (!scripts.exists && createUser) {
+      if (presets.exists || presets.create()) { scripts.create(); }
+    }
+    push(scripts);
   }
   return dirs;
 }
@@ -36,27 +52,41 @@ function moniRun(job) {
   var actionId = params.action_id || "action";
   var fileName = params.file_name || "pscoke.jsx";
   var source = new File(moniOwnFolder().fsName + "/" + fileName);
-  var dirs = moniPresetScriptDirs();
+  var dirs = moniPresetScriptDirs(mode === "install");
   var installed = [];
+  var errors = [];
 
   for (var i = 0; i < dirs.length; i++) {
     var folder = new Folder(dirs[i].fsName + "/Moni/" + actionId);
     var target = new File(folder.fsName + "/" + fileName);
     if (mode === "install") {
-      if (!source.exists) {
-        throw { code: "A500_ACTION_FAILED", message: "missing source script: " + source.fsName };
-      }
-      if (!folder.exists && !folder.create()) {
-        throw { code: "A500_ACTION_FAILED", message: "cannot create folder: " + folder.fsName };
-      }
-      if (target.exists && !target.remove()) {
-        throw { code: "A500_ACTION_FAILED", message: "cannot replace: " + target.fsName };
-      }
-      if (!source.copy(target)) {
-        throw { code: "A500_ACTION_FAILED", message: "cannot copy to: " + target.fsName };
+      // 程序目录可能只读（管理员安装），失败不应连累用户目录，逐个尝试并汇总。
+      try {
+        if (!source.exists) {
+          throw { message: "missing source script: " + source.fsName };
+        }
+        if (!folder.exists && !folder.create()) {
+          throw { message: "cannot create folder: " + folder.fsName };
+        }
+        if (target.exists && !target.remove()) {
+          throw { message: "cannot replace: " + target.fsName };
+        }
+        if (!source.copy(target)) {
+          throw { message: "cannot copy to: " + target.fsName };
+        }
+      } catch (failure) {
+        errors.push(String((failure && failure.message) || failure));
+        continue;
       }
     }
     if (target.exists) { installed.push(target.fsName); }
+  }
+
+  if (mode === "install" && installed.length === 0) {
+    throw {
+      code: "A500_ACTION_FAILED",
+      message: errors.length > 0 ? errors.join("; ") : "no writable Photoshop scripts folder"
+    };
   }
 
   return {

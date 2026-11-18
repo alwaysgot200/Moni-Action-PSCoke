@@ -7,7 +7,7 @@ Moni 的第三方动作示例（类 PSCoke）：**在浏览器里拾取图片 �
 
 - Moni 动作（Lua）与选项 schema；
 - 动作自带的 Photoshop 脚本（ExtendScript / JSX）；
-- 动作自己的「设置 PS 脚本」入口（`setup.lua`）；
+- 动作自己的「设置 PS 脚本」入口（`setup.lua`）；运行时缺脚本会自动安装，该入口用于重装/修复；
 - 纯 JS 单元测试（`node --test`）。
 
 > 设计原则：**外部软件的安装/检查是动作自己的工作，不是 Moni 的工作。**
@@ -17,27 +17,31 @@ Moni 的第三方动作示例（类 PSCoke）：**在浏览器里拾取图片 �
 ## 前置条件
 
 1. **Moni-Connector 浏览器扩展**已安装、已与 Moni 配对，Moni 首页浏览器桥显示已连接；
-2. **Photoshop 22.0+**，建议先启动并打开一个文档；
-3. 在本动作的设置里点击 **「设置 PS 脚本」**，把 `pscoke.jsx` 安装到
-   `Presets/Scripts/Moni/ps.browser-image-to-layer/`。
+2. **Photoshop 22.0+**，建议先启动并打开一个文档；未启动时动作会按选项 `launch_app`
+   自行拉起并等待就绪；
+3. PS 脚本**无需手动安装**：第一次点「运行」时动作会把 `pscoke.jsx` 自动装到
+   `Presets/Scripts/Moni/ps.browser-image-to-layer/`；设置里的 **「设置 PS 脚本」**
+   仅用于重装/修复。
 
-运行时会按顺序检查：浏览器桥在线 → PS 脚本已安装。任一缺失就提示并中止，
-不会在用户不知情的情况下尝试安装。
+运行时会按顺序检查并自愈：浏览器桥在线 → PS 在线（必要时拉起）→ PS 脚本已安装
+（缺失则**在同一次运行内自动安装**）。只有自动安装失败才提示并中止。
 
 ## 工作流程
 
 ```
 检查 browser 桥（未连接 → A406_BROWSER_OFFLINE，提示安装 Moni-Connector）
-  └─ 检查 pscoke.jsx 是否已安装（未安装 → A500_ACTION_FAILED + hint，提示去动作设置）
-       └─ 拾取/查询/右键图片 → ctx.http.download（带页面 Cookie/Referer）
-            └─ ctx.asset.path 取本地路径 → 自带 runner 执行 ps/pscoke.jsx
-                 └─ PS 当前文档：placeEvent 智能对象 + 网格/画布排布 + 组 + 一次撤销
+  └─ 检查 PS 是否在线（不在线且允许则拉起；失败 → A407_PS_OFFLINE）
+       └─ 检查 pscoke.jsx 是否已安装（缺失 → 自动 install，失败才 A500_ACTION_FAILED）
+            └─ 拾取/查询/右键图片 → ctx.http.download（带页面 Cookie/Referer）
+                 └─ ctx.asset.path 取本地路径 → 自带 runner 执行 ps/pscoke.jsx
+                      └─ PS 当前文档：placeEvent 智能对象 + 网格/画布排布 + 组 + 一次撤销
 ```
 
 ## 选项
 
 | 选项 | 取值 | 说明 |
 |---|---|---|
+| `launch_app` | 布尔（默认 `true`） | PS 未启动时是否由动作拉起 |
 | `mode` | `picker` / `selector` / `context` | 点选 / CSS 选择器批量 / 最近一次右键图片 |
 | `selector` | CSS 选择器 | `mode=selector` 时使用 |
 | `min_width` / `min_height` | 像素 | 过滤小图标 |
@@ -87,8 +91,8 @@ node --test "tests/**/*.test.mjs"
 
 | 现象 | 原因 / 处理 |
 |---|---|
-| `A406_BROWSER_OFFLINE` | Moni-Connector 未安装/未配对/未连接，先在浏览器启用扩展并配对 |
-| `A500_ACTION_FAILED` + hint「还没有安装 Photoshop 脚本」 | 动作设置 →「设置 PS 脚本」 |
+| `A406_BROWSER_OFFLINE` | Moni-Connector 未安装/未配对/未连接，先在浏览器启用扩展并配对；浏览器最小化时先切换到网页 |
+| `A500_ACTION_FAILED` + hint「自动安装 PS 脚本失败」 | 确认 PS 已正常启动后重试；仍失败再到动作设置点「设置 PS 脚本」 |
 | `A407_PS_OFFLINE` | 找不到 Photoshop；启动一次，或让动作 `programs.photoshop.candidates` 覆盖你的安装路径 |
 | `A404_NO_ELEMENTS` | 用户没选中图片 |
 | `A405_DOWNLOAD_FAILED` | 图片需要登录/防盗链；确认 `use_browser_cookies` 生效 |
