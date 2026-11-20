@@ -1,23 +1,116 @@
 {
-  "schema": "moni-action-v1",
-  "id": "ps.browser-image-to-layer",
-  "version": "1.3.2",
-  "display": { "key": "action.name" },
-  "type": "script",
-  "engine": { "name": "lua", "version": "5.4" },
-  "entry": "main.lua",
-  "setup": {
-    "entry": "setup.lua",
-    "label": { "key": "setup.label" }
-  },
+  "applies_to": [
+    "photoshop"
+  ],
   "compat": {
-    "platforms": ["windows", "macos"],
-    "arch": ["any"],
+    "apps": [
+      {
+        "id": "photoshop",
+        "min": "22.0"
+      }
+    ],
+    "arch": [
+      "any"
+    ],
+    "features": [
+      "bridge.browser>=1.0",
+      "ps.jsx>=1"
+    ],
     "host": ">=0.1.0 <2.0.0",
-    "features": ["bridge.browser>=1.0", "ps.jsx>=1"],
-    "apps": [{ "id": "photoshop", "min": "22.0" }]
+    "platforms": [
+      "windows",
+      "macos"
+    ]
   },
-  "applies_to": ["photoshop"],
+  "display": {
+    "key": "action.name"
+  },
+  "engine": {
+    "name": "lua",
+    "version": "5.4"
+  },
+  "entry": "main.lua",
+  "id": "932ba26d14ad4f7ea798bd9c43c2691f",
+  "options": {
+    "columns": {
+      "default": 3,
+      "label_key": "options.columns",
+      "max": 8,
+      "min": 1,
+      "type": "integer"
+    },
+    "fit": {
+      "default": "contain",
+      "label_key": "options.fit",
+      "type": "enum",
+      "values": [
+        "contain",
+        "original"
+      ]
+    },
+    "gap": {
+      "default": 24,
+      "label_key": "options.gap",
+      "max": 400,
+      "min": 0,
+      "type": "number"
+    },
+    "group": {
+      "default": true,
+      "label_key": "options.group",
+      "type": "boolean"
+    },
+    "launch_app": {
+      "default": true,
+      "label_key": "options.launch_app",
+      "type": "boolean"
+    },
+    "layout": {
+      "default": "grid",
+      "label_key": "options.layout",
+      "type": "enum",
+      "values": [
+        "grid",
+        "layers"
+      ]
+    },
+    "limit": {
+      "default": 50,
+      "label_key": "options.limit",
+      "max": 200,
+      "type": "integer"
+    },
+    "min_height": {
+      "default": 200,
+      "label_key": "options.min_height",
+      "type": "integer"
+    },
+    "min_width": {
+      "default": 200,
+      "label_key": "options.min_width",
+      "type": "integer"
+    },
+    "mode": {
+      "default": "picker",
+      "label_key": "options.mode",
+      "type": "enum",
+      "values": [
+        "picker",
+        "selector",
+        "context"
+      ]
+    },
+    "scroll": {
+      "default": false,
+      "label_key": "options.scroll",
+      "type": "boolean"
+    },
+    "selector": {
+      "default": "",
+      "label_key": "options.selector",
+      "type": "string"
+    }
+  },
   "permissions": [
     "bridge.call:browser",
     "net.fetch",
@@ -28,76 +121,41 @@
   ],
   "programs": [
     {
-      "id": "photoshop",
       "candidates": [
         "%ProgramFiles%/Adobe/Adobe Photoshop*/Photoshop.exe",
         "%ProgramFiles%/Adobe Photoshop*/Photoshop.exe",
         "%ProgramFiles(x86)%/Adobe/Adobe Photoshop*/Photoshop.exe",
         "%ProgramFiles(x86)%/Adobe Photoshop*/Photoshop.exe",
         "/Applications/Adobe Photoshop*/Adobe Photoshop*.app/Contents/MacOS/Adobe Photoshop*"
-      ]
+      ],
+      "id": "photoshop"
     },
     {
-      "id": "osascript",
-      "candidates": ["/usr/bin/osascript"]
+      "candidates": [
+        "/usr/bin/osascript"
+      ],
+      "id": "osascript"
     }
   ],
   "requires": {
-    "bridges": [{ "name": "browser", "min": "1.0.0" }]
+    "bridges": [
+      {
+        "min": "1.0.0",
+        "name": "browser"
+      }
+    ]
   },
-  "options": {
-    "launch_app": { "type": "boolean", "default": true, "label_key": "options.launch_app" },
-    "mode": {
-      "type": "enum",
-      "values": ["picker", "selector", "context"],
-      "default": "picker",
-      "label_key": "options.mode"
-    },
-    "selector": { "type": "string", "default": "", "label_key": "options.selector" },
-    "min_width": {
-      "type": "integer",
-      "default": 200,
-      "label_key": "options.min_width"
-    },
-    "min_height": {
-      "type": "integer",
-      "default": 200,
-      "label_key": "options.min_height"
-    },
-    "limit": {
-      "type": "integer",
-      "default": 50,
-      "max": 200,
-      "label_key": "options.limit"
-    },
-    "scroll": { "type": "boolean", "default": false, "label_key": "options.scroll" },
-    "layout": {
-      "type": "enum",
-      "values": ["grid", "layers"],
-      "default": "grid",
-      "label_key": "options.layout"
-    },
-    "columns": {
-      "type": "integer",
-      "default": 3,
-      "min": 1,
-      "max": 8,
-      "label_key": "options.columns"
-    },
-    "gap": {
-      "type": "number",
-      "default": 24,
-      "min": 0,
-      "max": 400,
-      "label_key": "options.gap"
-    },
-    "fit": {
-      "type": "enum",
-      "values": ["contain", "original"],
-      "default": "contain",
-      "label_key": "options.fit"
-    },
-    "group": { "type": "boolean", "default": true, "label_key": "options.group" }
+  "schema": "moni-action-v2",
+  "setup": {
+    "entry": "setup.lua",
+    "label": {
+      "key": "setup.label"
+    }
   },
-  "ui": { "icon": "collect", "group": "photoshop" }
+  "type": "script",
+  "ui": {
+    "group": "photoshop",
+    "icon": "collect"
+  },
+  "version": "1.3.2"
 }
